@@ -1,23 +1,59 @@
-# Vervathon-2023
+# Step 1: Install Required Libraries
+!pip install diffusers torch torchvision matplotlib transformers accelerate
 
-## Submission Instruction:
-  1. Fork this repository
-  2. Create a folder with your Team Name,Team leader name and your problem statement number
-  3. Upload all the code and necessary files in the created folder
-  4. Upload a **README.md** file in your folder with the below mentioned informations.
-  5. Generate a Pull Request with your Team Name. (Example: XYZ_Adhi_1)
+# Step 2: Import Necessary Libraries
+import torch
+from diffusers import StableDiffusionPipeline
+import matplotlib.pyplot as plt
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
 
-## README.md must consist of the following information:
+# Step 3: Function to Generate Image from Text
+def generate_image_from_text(prompt):
+    # Load the Stable Diffusion model (using a publicly available model)
+    model_id = "stabilityai/stable-diffusion-2-1"  # Updated model ID
+    pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
+    pipe = pipe.to("cuda")  # Use GPU if available
 
-#### Team Name - the visionaries
-#### Problem Statement - 3d model generation from text
-#### Team Leader Email - ram6070246@gmail.com
+    # Generate image
+    with torch.no_grad():
+        image = pipe(prompt).images[0]
 
-## A Brief of the Prototype:
-  This section must include prototype description
-  
-## Tech Stack: 
-   List Down all technologies used to Build the prototype
-  
-## What I Learned:
-   Write about the biggest learning you had while developing the prototype
+    return image
+
+# Step 4: Display the Generated Image
+def display_image(image):
+    plt.imshow(image)
+    plt.axis('off')  # Hide axes
+    plt.show()
+
+# Step 5: Create 3D Shape from Image
+def create_3d_shape_from_image(image):
+    # Convert image to grayscale
+    grayscale_image = image.convert("L")
+    img_array = np.array(grayscale_image)
+
+    # Create 3D surface
+    x = np.arange(0, img_array.shape[1], 1)
+    y = np.arange(0, img_array.shape[0], 1)
+    x, y = np.meshgrid(x, y)
+    z = img_array  # Use grayscale values as height
+
+    # Create a 3D plot
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(x, y, z, cmap='viridis')
+
+    # Show the 3D plot
+    plt.show()
+
+# Step 6: Main Function to Generate and Visualize
+def main():
+    text_prompt = "A sunset view from the top of the mountain"  # Specify your prompt here
+    generated_image = generate_image_from_text(text_prompt)
+    display_image(generated_image)
+    create_3d_shape_from_image(generated_image)
+
+# Run the main function
+if __name__ == "__main__":
+    main()
